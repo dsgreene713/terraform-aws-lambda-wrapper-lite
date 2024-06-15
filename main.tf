@@ -35,12 +35,12 @@ data "archive_file" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  filename         = filebase64sha256(local.function_output_path)
+  # filename         = filebase64sha256(local.function_output_path)
+  source_code_hash = data.archive_file.this.output_base64sha256
   function_name    = var.function_name
   role             = aws_iam_role.this.arn
   handler          = var.function_handler
   runtime          = var.function_runtime
-  source_code_hash = data.archive_file.this.output_base64sha256
   layers           = var.layers
   timeout          = var.timeout
   publish          = var.publish

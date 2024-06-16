@@ -112,3 +112,9 @@ variable "timeout" {
   type        = number
   default     = 120
 }
+
+variable "additional_json_policy_documents" {
+  type        = list(string)
+  description = "list of json iam policy document(s)"
+  default     = []
+}

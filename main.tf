@@ -1,4 +1,6 @@
 data "aws_partition" "current" {}
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 locals {
   function_output_path = "${path.module}/${var.function_name}.zip"
@@ -20,9 +22,36 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+data "aws_iam_policy_document" "cloudwatch_logs" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = [
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "merged" {
+  source_policy_documents = concat(
+    [data.aws_iam_policy_document.cloudwatch_logs.json],
+    var.additional_json_policy_documents
+  )
+}
+
+resource "aws_iam_policy" "merged" {
+  name   = "${var.function_name}-policy"
+  policy = data.aws_iam_policy_document.merged.json
+}
+
 resource "aws_iam_role" "this" {
-  name               = "${var.function_name}-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  name                = "${var.function_name}-role"
+  assume_role_policy  = data.aws_iam_policy_document.assume_role.json
+  managed_policy_arns = [aws_iam_policy.merged.arn]
 }
 
 ######################################################################################

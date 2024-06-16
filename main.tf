@@ -36,6 +36,8 @@ data "archive_file" "this" {
 
 resource "aws_lambda_function" "this" {
   filename         = local.function_output_path
+  description      = var.description
+  architectures    = var.architectures
   source_code_hash = data.archive_file.this.output_base64sha256
   function_name    = var.function_name
   role             = aws_iam_role.this.arn
@@ -45,6 +47,7 @@ resource "aws_lambda_function" "this" {
   timeout          = var.timeout
   publish          = var.publish
   kms_key_arn      = var.kms_key_arn
+  tags             = var.tags
 
   dynamic "environment" {
     for_each = length(keys(var.environment_variables)) == 0 ? [] : [true]

@@ -24,6 +24,24 @@ variable "function_runtime" {
 ######################################################################################
 # optional variables
 ######################################################################################
+variable "description" {
+  type        = string
+  description = "Description of what your Lambda Function does"
+  default     = ""
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "map of tag(s) to assign to the function"
+  default     = {}
+}
+
+variable "architectures" {
+  type        = list(string)
+  description = "Instruction set architecture for your Lambda function"
+  default     = ["x86_64"]
+}
+
 variable "environment_variables" {
   description = "A map that defines environment variables for the Lambda Function."
   type        = map(string)
